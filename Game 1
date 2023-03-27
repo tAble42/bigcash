@@ -1,0 +1,114 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Define game window dimensions
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+
+# Set up game window
+game_window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption("Robot Rampage")
+
+# Define robot dimensions
+ROBOT_WIDTH = 100
+ROBOT_HEIGHT = 150
+
+# Load robot image
+robot_image = pygame.image.load("robot.png")
+
+# Define enemy robot dimensions
+ENEMY_WIDTH = 75
+ENEMY_HEIGHT = 100
+
+# Load enemy robot image
+enemy_image = pygame.image.load("enemy_robot.png")
+
+# Define missile dimensions
+MISSILE_WIDTH = 25
+MISSILE_HEIGHT = 50
+
+# Load missile image
+missile_image = pygame.image.load("missile.png")
+
+# Define explosion dimensions
+EXPLOSION_WIDTH = 100
+EXPLOSION_HEIGHT = 100
+
+# Load explosion image
+explosion_image = pygame.image.load("explosion.png")
+
+# Define colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+
+# Set up clock
+clock = pygame.time.Clock()
+
+# Define game variables
+score = 0
+health = 100
+game_over = False
+
+# Define sprite classes
+class Robot(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = robot_image
+        self.rect = self.image.get_rect()
+        self.rect.x = WINDOW_WIDTH // 2
+        self.rect.y = WINDOW_HEIGHT - ROBOT_HEIGHT
+    
+    def update(self):
+        # Move robot left or right
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= 5
+        elif keys[pygame.K_RIGHT]:
+            self.rect.x += 5
+            
+        # Fire missiles
+        if keys[pygame.K_SPACE]:
+            missile = Missile()
+            missile.rect.x = self.rect.x + ROBOT_WIDTH // 2 - MISSILE_WIDTH // 2
+            missile.rect.y = self.rect.y - MISSILE_HEIGHT
+            all_sprites.add(missile)
+            missiles.add(missile)
+
+class EnemyRobot(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = enemy_image
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(WINDOW_WIDTH - ENEMY_WIDTH)
+        self.rect.y = random.randrange(-100, -ENEMY_HEIGHT)
+        self.speedy = random.randrange(1, 5)
+        self.speedx = random.randrange(-2, 2)
+    
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        
+        if self.rect.top > WINDOW_HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WINDOW_WIDTH + 20:
+            self.rect.x = random.randrange(WINDOW_WIDTH - ENEMY_WIDTH)
+            self.rect.y = random.randrange(-100, -ENEMY_HEIGHT)
+            self.speedy = random.randrange(1, 5)
+
+class Missile(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = missile_image
+        self.rect = self.image.get_rect()
+        self.speedy = -10
+    
+    def update(self):
+        self.rect.y += self.speedy
+        if self.rect.bottom < 0:
+            self.kill()
+
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, center):
+       
